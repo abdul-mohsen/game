@@ -6,6 +6,44 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+static void debug(char* msg) {
+  printf("%s\n", msg);
+}
+
+static void debugInt(int x) {
+  printf("%d\n", x);
+}
+
+static char* ParseShader(const char* file) {
+  FILE *handler = fopen(file, "r");
+  char *buffer = NULL;
+  int stringSize, readSize;
+
+  if (handler) {
+    fseeko(handler, 0, SEEK_END);
+    stringSize = ftello(handler);
+    debugInt(stringSize);
+
+    rewind(handler);
+    buffer = (char*) malloc(sizeof(char) * (stringSize + 1));
+    readSize = fread(buffer, sizeof(char), stringSize, handler);
+    debugInt(readSize);
+
+    buffer[stringSize] = '\0';
+
+    if (stringSize != readSize) {
+      free(buffer);
+      buffer = NULL;
+    }
+
+    fclose(handler);
+  
+  }
+
+  printf("Output: %s\n", buffer);
+  return buffer;
+}
+
 #define IMG_WIDTH 900
 #define IMG_HEIGHT 600
 
@@ -21,6 +59,7 @@ static const struct
   };
 
 static void error_callback(int error, const char* description)
+
 {
   fprintf(stderr, "Error: %s\n", description);
 }
@@ -40,7 +79,7 @@ static unsigned int CompileShader(unsigned int type, const char* source) {
     char* message = (char*) alloca(length * sizeof(char));
 
     glGetShaderInfoLog(id, length, &length, message);
-    printf("Fail to compile shader");
+    printf("Fail to compile shader\n");
     if (type == GL_VERTEX_SHADER) {
       printf("vertex \n");
     } else if (type == GL_FRAGMENT_SHADER) {
@@ -52,7 +91,6 @@ static unsigned int CompileShader(unsigned int type, const char* source) {
     return EXIT_SUCCESS;
   
   }
-
   
   return id;
 }
@@ -76,13 +114,14 @@ static unsigned int CreateShader(const char* vertexShader, const char* fragmentS
 
 int main()
 {
-  printf("\n");
+  printf("\n------- Program Start -------\n");
+  ParseShader("res/shaders/Basic.shader");
 
   glfwSetErrorCallback(error_callback);
 
   if (!glfwInit()) {
 
-    printf("failed to init");
+    printf("failed to init\n");
     return EXIT_FAILURE;
 
   }
@@ -90,7 +129,7 @@ int main()
   GLFWwindow* window = glfwCreateWindow(IMG_WIDTH, IMG_HEIGHT, "ssda", NULL, NULL);
 
   if (!window) {
-    printf("no Window");
+    printf("no Window\n");
     glfwTerminate();
     return EXIT_FAILURE;
   }
@@ -98,7 +137,7 @@ int main()
   glfwMakeContextCurrent(window);
 
   if (glewInit()) {
-    printf("failed to init glew");
+    printf("failed to init glew\n");
   }
 
   float positions[6] = {
@@ -115,30 +154,9 @@ int main()
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-  char* vertexShader = 
-    "#version 330 core\n"
-    "\n"
-    "layout(location = 0) in vec4 position;"
-    "\n"
-    "void main()\n"
-    "{\n"
-    " gl_Position = position;\n"
-    "\n}"
-  ;
 
-  char* fragmentShader = 
-    "#version 330 core\n"
-    "\n"
-    "layout(location = 0) out vec4 color;\n"
-    "\n"
-    "void main()\n"
-    "{\n"
-    " color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-    "\n}"
-  ;
-
-  unsigned int shader = CreateShader(vertexShader, fragmentShader);
-  glUseProgram(shader);
+  // unsigned int shader = CreateShader(vertexShader, fragmentShader);
+  //glUseProgram(shader);
 
 
   while (!glfwWindowShouldClose(window)) {
