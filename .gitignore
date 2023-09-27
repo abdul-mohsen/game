@@ -1,1 +1,4 @@
 build/*
+core.*
+tmp
+test.c

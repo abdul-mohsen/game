@@ -1,3 +1,5 @@
+#include <alloca.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -5,44 +7,6 @@
 #define GLFW_DLL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-static void debug(char* msg) {
-  printf("%s\n", msg);
-}
-
-static void debugInt(int x) {
-  printf("%d\n", x);
-}
-
-static char* ParseShader(const char* file) {
-  FILE *handler = fopen(file, "r");
-  char *buffer = NULL;
-  int stringSize, readSize;
-
-  if (handler) {
-    fseeko(handler, 0, SEEK_END);
-    stringSize = ftello(handler);
-    debugInt(stringSize);
-
-    rewind(handler);
-    buffer = (char*) malloc(sizeof(char) * (stringSize + 1));
-    readSize = fread(buffer, sizeof(char), stringSize, handler);
-    debugInt(readSize);
-
-    buffer[stringSize] = '\0';
-
-    if (stringSize != readSize) {
-      free(buffer);
-      buffer = NULL;
-    }
-
-    fclose(handler);
-  
-  }
-
-  printf("Output: %s\n", buffer);
-  return buffer;
-}
 
 #define IMG_WIDTH 900
 #define IMG_HEIGHT 600
@@ -57,6 +21,73 @@ static const struct
     { .6f, -.4f, 0.f, 1.f, 0.f},
     { 0.f, -.6f, 0.f, 0.f, 1.f},
   };
+
+struct Shader {
+  char* vertex;
+  char* fragment;
+};
+static void debug(char* msg) {
+  printf("%s\n", msg);
+}
+
+static void debugInt(int x) {
+  printf("%d\n", x);
+}
+
+static char* readFile(const char* file) {
+  FILE *handler = fopen(file, "r");
+  char *buffer = NULL;
+  int stringSize, readSize;
+
+  if (handler) {
+    fseeko(handler, 0, SEEK_END);
+    stringSize = ftello(handler);
+
+    rewind(handler);
+    buffer = (char*) malloc(sizeof(char) * (stringSize + 1));
+    readSize = fread(buffer, sizeof(char), stringSize, handler);
+
+    buffer[stringSize] = '\0';
+
+    if (stringSize != readSize) {
+      free(buffer);
+      buffer = NULL;
+    }
+
+    fclose(handler);
+  
+  }
+
+  return buffer;
+}
+
+struct Shader * parseShader(char* fileName) {
+  char* text = readFile(fileName);
+  char* origin = text;
+  char* loc = NULL;
+  int iter = 0;
+  struct Shader *mShader = malloc(sizeof(struct Shader));
+
+  while ((loc = strchr(text, '#')) != NULL) {
+    text = loc;
+    if (++iter == 1) {
+      int size = strchr(text + 1, '#') - text;
+      mShader->vertex = malloc(size);
+      memcpy(mShader->vertex, text, size);
+      mShader->vertex[size - 1] = '\0';
+
+    } else if(iter == 2) {
+      int size = strchr(text + 1, '\0') - text;
+      mShader->fragment = malloc(size);
+      memcpy(mShader->fragment, text, size);
+      mShader->fragment[size - 1] = '\0';
+    }
+    text++;
+  }
+
+  free(origin);
+  return mShader;
+}
 
 static void error_callback(int error, const char* description)
 
@@ -87,7 +118,7 @@ static unsigned int CompileShader(unsigned int type, const char* source) {
     } else {
       printf("Unkown error %d", type);
     } 
-    glDeleteShader(id);
+    glDeleteProgram(id);
     return EXIT_SUCCESS;
   
   }
@@ -115,7 +146,6 @@ static unsigned int CreateShader(const char* vertexShader, const char* fragmentS
 int main()
 {
   printf("\n------- Program Start -------\n");
-  ParseShader("res/shaders/Basic.shader");
 
   glfwSetErrorCallback(error_callback);
 
@@ -154,9 +184,9 @@ int main()
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-
-  // unsigned int shader = CreateShader(vertexShader, fragmentShader);
-  //glUseProgram(shader);
+  struct Shader *mShader = parseShader("res/shaders/Basic.shader");
+  unsigned int shader = CreateShader(mShader->vertex, mShader->fragment);
+  glUseProgram(shader);
 
 
   while (!glfwWindowShouldClose(window)) {
