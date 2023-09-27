@@ -33,6 +33,9 @@ static void debug(char* msg) {
 static void debugInt(int x) {
   printf("%d\n", x);
 }
+static void debugFloat(float msg) {
+  printf("%f\n", msg);
+}
 
 static char* readFile(const char* file) {
   FILE *handler = fopen(file, "r");
@@ -142,12 +145,19 @@ static unsigned int CreateShader(const char* vertexShader, const char* fragmentS
   return program;
 
 }
+static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+{
+  printf("\n %d %d %d %d %d %s", source, type, id, severity, length, message);
+
+}
+
 
 int main()
 {
   printf("\n------- Program Start -------\n");
 
   glfwSetErrorCallback(error_callback);
+  const void* userPrama = "";
 
   if (!glfwInit()) {
 
@@ -169,6 +179,7 @@ int main()
   if (glewInit()) {
     printf("failed to init glew\n");
   }
+  glDebugMessageCallback(glErrorCallback, userPrama);
 
   float positions[] = {
     .5f, -.5f,
