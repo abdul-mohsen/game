@@ -172,7 +172,7 @@ int main()
 {
   printf("\n------- Program Start -------\n");
 
-  glfwSetErrorCallback(error_callback);
+  // glfwSetErrorCallback(error_callback);
   const void* userPrama = "";
 
   if (!glfwInit()) {
@@ -181,6 +181,11 @@ int main()
     return EXIT_FAILURE;
 
   }
+
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   GLFWwindow* window = glfwCreateWindow(IMG_WIDTH, IMG_HEIGHT, "ssda", NULL, NULL);
 
@@ -213,10 +218,15 @@ int main()
     1,2,3
   };
 
+  unsigned int vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+
+
   unsigned int buffer;
   glGenBuffers(1, &buffer);
   glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
@@ -233,13 +243,24 @@ int main()
   int location = glGetUniformLocation(shader, "u_Color");
   glUniform4f(location, .2f, .3f, .8f, 1.0f);
 
+
+  glBindVertexArray(0);
+  glUseProgram(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
   float r = .0f;
   float increament = .05f;
 
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glUseProgram(shader);
     glUniform4f(location, r, .3f, .8f, 1.0f);
+
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
     if (r > 1.0f) increament = -.05f;
