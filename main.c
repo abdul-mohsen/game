@@ -10,6 +10,22 @@
 
 #define IMG_WIDTH 900
 #define IMG_HEIGHT 600
+#define TRUE 1
+#define FALSE 0
+
+static void GLClearError() {
+  GLenum error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("\nopenGL Error: %d",error);
+  } 
+}
+
+static void GLCheckError() {
+  GLenum error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("\nopenGL Error: %d",error);
+  } 
+}
 
 static const struct
 {
@@ -176,10 +192,14 @@ int main()
 
   glfwMakeContextCurrent(window);
 
+  glfwSwapInterval(1);
+
   if (glewInit()) {
     printf("failed to init glew\n");
   }
+  GLClearError();
   glDebugMessageCallback(glErrorCallback, userPrama);
+  GLCheckError();
 
   float positions[] = {
     .5f, -.5f,
@@ -210,11 +230,22 @@ int main()
   unsigned int shader = CreateShader(mShader->vertex, mShader->fragment);
   glUseProgram(shader);
 
+  int location = glGetUniformLocation(shader, "u_Color");
+  glUniform4f(location, .2f, .3f, .8f, 1.0f);
+
+  float r = .0f;
+  float increament = .05f;
 
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glUniform4f(location, r, .3f, .8f, 1.0f);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+
+    if (r > 1.0f) increament = -.05f;
+    else if (r < .05f) increament = .05f;
+
+    r += increament;
 
     glfwSwapBuffers(window);
     glfwPollEvents();
