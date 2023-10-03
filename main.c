@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include "lib/Util.c"
+#include "lib/VertexBuffer.c"
+#include "lib/IndexBuffer.c"
+#include "lib/VertexBuffer.h"
 #define GLFW_DLL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,20 +15,6 @@
 #define IMG_HEIGHT 600
 #define TRUE 1
 #define FALSE 0
-
-static void GLClearError() {
-  GLenum error;
-  while ((error = glGetError()) != GL_NO_ERROR) {
-    printf("\nopenGL Error: %d",error);
-  } 
-}
-
-static void GLCheckError() {
-  GLenum error;
-  while ((error = glGetError()) != GL_NO_ERROR) {
-    printf("\nopenGL Error: %d",error);
-  } 
-}
 
 static const struct
 {
@@ -42,43 +31,6 @@ struct Shader {
   char* vertex;
   char* fragment;
 };
-static void debug(char* msg) {
-  printf("%s\n", msg);
-}
-
-static void debugInt(int x) {
-  printf("%d\n", x);
-}
-static void debugFloat(float msg) {
-  printf("%f\n", msg);
-}
-
-static char* readFile(const char* file) {
-  FILE *handler = fopen(file, "r");
-  char *buffer = NULL;
-  int stringSize, readSize;
-
-  if (handler) {
-    fseeko(handler, 0, SEEK_END);
-    stringSize = ftello(handler);
-
-    rewind(handler);
-    buffer = (char*) malloc(sizeof(char) * (stringSize + 1));
-    readSize = fread(buffer, sizeof(char), stringSize, handler);
-
-    buffer[stringSize] = '\0';
-
-    if (stringSize != readSize) {
-      free(buffer);
-      buffer = NULL;
-    }
-
-    fclose(handler);
-  
-  }
-
-  return buffer;
-}
 
 struct Shader * parseShader(char* fileName) {
   char* text = readFile(fileName);
@@ -168,8 +120,7 @@ static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severi
 }
 
 
-int main()
-{
+int main() {
   printf("\n------- Program Start -------\n");
 
   // glfwSetErrorCallback(error_callback);
@@ -222,19 +173,12 @@ int main()
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-
-  unsigned int buffer;
-  glGenBuffers(1, &buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
-  glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+  VertexBuffer *vertexBuffer = createVertexBuffer(positions, 4 * 2 * sizeof(float));
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-  unsigned int ibo;
-  glGenBuffers(1, &ibo);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+  IndexBuffer * indexBuffer = createIndexBuffer( indices, 6);
 
   struct Shader *mShader = parseShader("res/shaders/Basic.shader");
   unsigned int shader = CreateShader(mShader->vertex, mShader->fragment);
@@ -242,7 +186,6 @@ int main()
 
   int location = glGetUniformLocation(shader, "u_Color");
   glUniform4f(location, .2f, .3f, .8f, 1.0f);
-
 
   glBindVertexArray(0);
   glUseProgram(0);
@@ -259,8 +202,10 @@ int main()
     glUniform4f(location, r, .3f, .8f, 1.0f);
 
     glBindVertexArray(vao);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    bindIndexBuffer(indexBuffer);
+    GLCheckError();
 
+    GLCheckError();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
     if (r > 1.0f) increament = -.05f;
@@ -272,7 +217,8 @@ int main()
     glfwPollEvents();
   }
 
-
+  free(vertexBuffer);
+  free(indexBuffer);
   glfwTerminate();
   
   printf("\n");
