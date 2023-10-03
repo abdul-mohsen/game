@@ -3,9 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "lib/Util.c"
-#include "lib/VertexBuffer.c"
-#include "lib/IndexBuffer.c"
+#include "lib/Util.h"
+#include "lib/IndexBuffer.h"
 #include "lib/VertexBuffer.h"
 #define GLFW_DLL
 #include <GL/glew.h>
@@ -15,17 +14,6 @@
 #define IMG_HEIGHT 600
 #define TRUE 1
 #define FALSE 0
-
-static const struct
-{
-  float x, y;
-  float r, g, b;
-} vertces[3] = 
-  {
-    { -.6f, -.4f, 1.f, 0.f, 0.f},
-    { .6f, -.4f, 0.f, 1.f, 0.f},
-    { 0.f, -.6f, 0.f, 0.f, 1.f},
-  };
 
 struct Shader {
   char* vertex;
@@ -60,11 +48,9 @@ struct Shader * parseShader(char* fileName) {
   return mShader;
 }
 
-static void error_callback(int error, const char* description)
-
-{
-  fprintf(stderr, "Error: %s\n", description);
-}
+//static void error_callback(int error, const char* description) {
+//  fprintf(stderr, "Error: %s\n", description);
+//}
 
 static unsigned int CompileShader(unsigned int type, const char* source) {
 
@@ -113,10 +99,8 @@ static unsigned int CreateShader(const char* vertexShader, const char* fragmentS
   return program;
 
 }
-static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
-{
+static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
   printf("\n %d %d %d %d %d %s", source, type, id, severity, length, message);
-
 }
 
 

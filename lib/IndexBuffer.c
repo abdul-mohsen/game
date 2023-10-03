@@ -20,6 +20,6 @@ void bindIndexBuffer(IndexBuffer * indexBuffer) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->renderId);
 }
 
-void unbindIndexBuffer(const IndexBuffer * indexBuffer){
+void unbindIndexBuffer() {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }

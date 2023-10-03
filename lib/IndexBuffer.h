@@ -5,7 +5,7 @@ typedef struct {
   unsigned int count;
 } IndexBuffer;
 
-IndexBuffer * createIndexBufferx(const unsigned int* data, unsigned int count);
+IndexBuffer * createIndexBuffer(const unsigned int* data, unsigned int count);
 void deleteIndexBuffer(const IndexBuffer * vertexBuffer);
 void bindIndexBuffer(IndexBuffer * vertexBuffer);
-void unbindIndexBuffer(const IndexBuffer * vertexBuffer);
+void unbindIndexBuffer();

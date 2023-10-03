@@ -1,5 +1,3 @@
-#pragma once
-
 #include "VertexBuffer.h"
 #include <GL/glew.h>
 #include <stdlib.h>
@@ -20,6 +18,6 @@ void bindVertexBuffer(const VertexBuffer * vertexBuffer) {
   glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->renderId);
 }
 
-void unbindVertexBuffer(const VertexBuffer * vertexBuffer) {
+void unbindVertexBuffer() {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
