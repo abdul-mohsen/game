@@ -178,7 +178,7 @@ int main() {
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
-  IndexBuffer * indexBuffer = createIndexBuffer( indices, 6);
+  IndexBuffer * indexBuffer = createIndexBuffer(indices, 6);
 
   struct Shader *mShader = parseShader("res/shaders/Basic.shader");
   unsigned int shader = CreateShader(mShader->vertex, mShader->fragment);
@@ -205,7 +205,6 @@ int main() {
     bindIndexBuffer(indexBuffer);
     GLCheckError();
 
-    GLCheckError();
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
     if (r > 1.0f) increament = -.05f;

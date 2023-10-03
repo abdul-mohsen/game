@@ -6,10 +6,8 @@
 
 VertexBuffer * createVertexBuffer(const void* data, unsigned int size){
   VertexBuffer * vertexBuffer = malloc(sizeof(VertexBuffer));
-  vertexBuffer->renderId = 1;
-  unsigned int buffer = vertexBuffer->renderId;
-  glGenBuffers(1, &buffer);
-  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glGenBuffers(1, &vertexBuffer->renderId);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->renderId);
   glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
   return vertexBuffer;
 }
