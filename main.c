@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "lib/openGLModel/IndexBuffer.h"
+#include "lib/openGLModel/Shader.h"
 #include "lib/openGLModel/VertexBuffer.h"
 #include "lib/openGLModel/VertexArray.h"
 #include "lib/openGLModel/VertexBufferLayout.h"
@@ -17,90 +18,11 @@
 #define TRUE 1
 #define FALSE 0
 
-struct Shader {
-  char* vertex;
-  char* fragment;
-};
-
-struct Shader * parseShader(char* fileName) {
-  char* text = readFile(fileName);
-  char* origin = text;
-  char* loc = NULL;
-  int iter = 0;
-  struct Shader *mShader = malloc(sizeof(struct Shader));
-
-  while ((loc = strchr(text, '#')) != NULL) {
-    text = loc;
-    if (++iter == 1) {
-      int size = strchr(text + 1, '#') - text;
-      mShader->vertex = malloc(size);
-      memcpy(mShader->vertex, text, size);
-      mShader->vertex[size - 1] = '\0';
-
-    } else if(iter == 2) {
-      int size = strchr(text + 1, '\0') - text;
-      mShader->fragment = malloc(size);
-      memcpy(mShader->fragment, text, size);
-      mShader->fragment[size - 1] = '\0';
-    }
-    text++;
-  }
-
-  free(origin);
-  return mShader;
-}
-
 //static void error_callback(int error, const char* description) {
 //  fprintf(stderr, "Error: %s\n", description);
 //}
 
-static unsigned int CompileShader(unsigned int type, const char* source) {
 
-  unsigned int id = glCreateShader(type);
-  glShaderSource(id, 1, &source, NULL);
-  glCompileShader(id);
-
-  int result;
-  glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-
-  if (result == GL_FALSE) {
-    int length;
-    glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-    char* message = (char*) alloca(length * sizeof(char));
-
-    glGetShaderInfoLog(id, length, &length, message);
-    printf("Fail to compile shader\n");
-    if (type == GL_VERTEX_SHADER) {
-      printf("vertex \n");
-    } else if (type == GL_FRAGMENT_SHADER) {
-      printf("fragment \n");
-    } else {
-      printf("Unkown error %d", type);
-    } 
-    glDeleteProgram(id);
-    return EXIT_SUCCESS;
-  
-  }
-  
-  return id;
-}
-
-static unsigned int CreateShader(const char* vertexShader, const char* fragmentShader) {
-  unsigned int program = glCreateProgram();
-  unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-  unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-  glAttachShader(program, vs);
-  glAttachShader(program, fs);
-  glLinkProgram(program);
-  glValidateProgram(program);
-
-  glDeleteShader(vs);
-  glDeleteShader(fs);
-
-  return program;
-
-}
 static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
   printf("\n %d %d %d %d %d %s", source, type, id, severity, length, message);
 }
@@ -172,11 +94,12 @@ int main() {
 
   IndexBuffer * indexBuffer = createIndexBuffer(indices, 6);
 
-  struct Shader *mShader = parseShader("res/shaders/Basic.shader");
-  unsigned int shader = CreateShader(mShader->vertex, mShader->fragment);
-  glUseProgram(shader);
+  struct Shader * shader = initShader("res/shaders/Basic.shader");
+  struct _Shader *mShader = parseShader(shader);
+  unsigned int iShader = createShader(shader, mShader->vertex, mShader->fragment);
+  glUseProgram(iShader);
 
-  int location = glGetUniformLocation(shader, "u_Color");
+  int location = glGetUniformLocation(iShader, "u_Color");
   glUniform4f(location, .2f, .3f, .8f, 1.0f);
 
   glBindVertexArray(0);
@@ -190,7 +113,7 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(shader);
+    glUseProgram(iShader);
     glUniform4f(location, r, .3f, .8f, 1.0f);
 
     bindVertexArray(va);
