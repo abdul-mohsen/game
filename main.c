@@ -3,9 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "lib/Util.h"
-#include "lib/IndexBuffer.h"
-#include "lib/VertexBuffer.h"
+#include "lib/openGLModel/IndexBuffer.h"
+#include "lib/openGLModel/VertexBuffer.h"
+#include "lib/openGLModel/VertexArray.h"
+#include "lib/openGLModel/VertexBufferLayout.h"
+#include "lib/util/Util.h"
 #define GLFW_DLL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -157,7 +159,13 @@ int main() {
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
+  struct VertexArray * va = createVertexArray();
+
   VertexBuffer *vertexBuffer = createVertexBuffer(positions, 4 * 2 * sizeof(float));
+
+  struct VertexBufferLayout * layout = createVertexBufferLayout();
+  pushVertexFufferElementFloat(layout, 2);
+  addBuffer(va, *vertexBuffer, *layout);
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
@@ -185,9 +193,8 @@ int main() {
     glUseProgram(shader);
     glUniform4f(location, r, .3f, .8f, 1.0f);
 
-    glBindVertexArray(vao);
+    bindVertexArray(va);
     bindIndexBuffer(indexBuffer);
-    GLCheckError();
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
