@@ -30,8 +30,7 @@ int compileShader(unsigned int type, const char * source) {
       printf("Unkown error %d", type);
     } 
     glDeleteProgram(id);
-    return EXIT_SUCCESS;
-  
+    return EXIT_FAILURE;
   }
   
   return id;
@@ -80,19 +79,32 @@ unsigned int createShader(struct Shader * self, const char* vertexShader, const 
   glDeleteShader(fs);
 
   return program;
-
 }
 
 struct Shader * initShader(char * filePath) {
   struct Shader * shader = malloc(sizeof(struct Shader));
   shader->filePath = filePath;
-  shader->renderId = 0;
+  
+  struct _Shader *mShader = parseShader(shader);
+  shader->renderId = createShader(shader, mShader->vertex, mShader->fragment);
   return shader;
 }
 
 void bindShader(struct Shader * self) {
-
+  glUseProgram(self->renderId);
 }
-void unbindShader(struct Shader * self);
-void SetUniform4fShader(struct Shader * self, const char * name, float v0, float v1, float v2, float v3);
 
+void unbindShader(struct Shader * self) {
+  glUseProgram(0);
+}
+void setUniform4fShader(struct Shader * self, const char * name, float v0, float v1, float v2, float v3) {
+  glUniform4f(getUniform4fShader(self, name), v0, v1, v2, v3); 
+}
+
+int getUniform4fShader(struct Shader * self, const char * name) {
+  int location = glGetUniformLocation(self->renderId, "u_Color");
+  if (location == -1) {
+    debug("An error in getUniform4fShader");
+  }
+  return location;
+}

@@ -95,17 +95,16 @@ int main() {
   IndexBuffer * indexBuffer = createIndexBuffer(indices, 6);
 
   struct Shader * shader = initShader("res/shaders/Basic.shader");
-  struct _Shader *mShader = parseShader(shader);
-  unsigned int iShader = createShader(shader, mShader->vertex, mShader->fragment);
-  glUseProgram(iShader);
+  bindShader(shader);
+  setUniform4fShader(shader, "u_Color", .2f, .3f, .8f, 1.0f);
 
-  int location = glGetUniformLocation(iShader, "u_Color");
-  glUniform4f(location, .2f, .3f, .8f, 1.0f);
-
-  glBindVertexArray(0);
-  glUseProgram(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  unbindVertexArray(va);
+  unbindVertexBuffer();
+  unbindIndexBuffer();
+  unbindShader(shader);
 
   float r = .0f;
   float increament = .05f;
@@ -113,8 +112,8 @@ int main() {
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(iShader);
-    glUniform4f(location, r, .3f, .8f, 1.0f);
+    bindShader(shader);
+    setUniform4fShader(shader, "u_Color", r, .3f, .8f, 1.0f);
 
     bindVertexArray(va);
     bindIndexBuffer(indexBuffer);
