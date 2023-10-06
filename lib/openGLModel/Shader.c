@@ -102,6 +102,7 @@ void setUniform4fShader(struct Shader * self, const char * name, float v0, float
 }
 
 int getUniform4fShader(struct Shader * self, const char * name) {
+  // TODO us map to cache this info 
   int location = glGetUniformLocation(self->renderId, "u_Color");
   if (location == -1) {
     debug("An error in getUniform4fShader");

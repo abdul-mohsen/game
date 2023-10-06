@@ -1,4 +1,4 @@
-#pragma ocne
+#pragma once 
 
 #include "VertexBuffer.h"
 #include "VertexBufferLayout.h"

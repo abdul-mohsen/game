@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include "lib/openGLModel/IndexBuffer.h"
+#include "lib/openGLModel/Renderer.h"
 #include "lib/openGLModel/Shader.h"
 #include "lib/openGLModel/VertexBuffer.h"
 #include "lib/openGLModel/VertexArray.h"
 #include "lib/openGLModel/VertexBufferLayout.h"
 #include "lib/util/Util.h"
-#define GLFW_DLL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -18,14 +18,6 @@
 #define TRUE 1
 #define FALSE 0
 
-//static void error_callback(int error, const char* description) {
-//  fprintf(stderr, "Error: %s\n", description);
-//}
-
-
-static void glErrorCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-  printf("\n %d %d %d %d %d %s", source, type, id, severity, length, message);
-}
 
 
 int main() {
@@ -109,16 +101,13 @@ int main() {
   float r = .0f;
   float increament = .05f;
 
+  struct Renderer * renderer = malloc(sizeof(struct Renderer));
+
   while (!glfwWindowShouldClose(window)) {
-    glClear(GL_COLOR_BUFFER_BIT);
 
     bindShader(shader);
     setUniform4fShader(shader, "u_Color", r, .3f, .8f, 1.0f);
-
-    bindVertexArray(va);
-    bindIndexBuffer(indexBuffer);
-
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+    draw(va, indexBuffer, shader);
 
     if (r > 1.0f) increament = -.05f;
     else if (r < .05f) increament = .05f;
