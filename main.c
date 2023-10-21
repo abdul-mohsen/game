@@ -104,6 +104,7 @@ int main() {
   struct Renderer * renderer = malloc(sizeof(struct Renderer));
 
   while (!glfwWindowShouldClose(window)) {
+    clear();
 
     bindShader(shader);
     setUniform4fShader(shader, "u_Color", r, .3f, .8f, 1.0f);

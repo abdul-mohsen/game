@@ -6,7 +6,20 @@
 #include <GLFW/glfw3.h>
 #include <string.h>
 
+void GLClearError() {
+  GLenum error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("\nopenGL Error: %d",error);
+  } 
+}
 
+void GLCheckError() {
+  GLenum error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("\nopenGL Error: 0x%02X",error);
+    printf("\nopenGL Error: %d",error);
+  } 
+}
 int compileShader(unsigned int type, const char * source) {
   unsigned int id = glCreateShader(type);
   glShaderSource(id, 1, &source, NULL);
